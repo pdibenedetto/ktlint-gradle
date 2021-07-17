@@ -5,16 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [10.1.0-SNAPSHOT] Unreleased
+## [10.2.0-SNAPSHOT] - Unreleased
 ### Added
   - ?
+
+### Changed
+  - Update Gradle to `7.1.1` version
+  - Update Shadow plugin to `7.0.0` version
+  - Update Kotlin to `1.5.21` version
+
+### Fixed
+  - Pre-commit hook causing conflicts ([issue: #443](https://github.com/JLLeitschuh/ktlint-gradle/issues/443)) ([#502](https://github.com/JLLeitschuh/ktlint-gradle/pull/502))
+
+### Removed
+  - ?
+
+## [10.1.0] - 2021.06.02
+### Added
+  - Baseline support ([#414](https://github.com/JLLeitschuh/ktlint-gradle/issues/414))
+
+    Limitations:
+    - Format tasks ignore baseline
+    - One baseline file per-Gradle project (module)
+    
 ### Changed
   - Updated Gradle to `6.8.3` version
   - Updated default KtLint version to `0.41.0`
 ### Fixed
   - Plugin fails to apply on non-Kotlin projects ([#443](https://github.com/JLLeitschuh/ktlint-gradle/issues/443))
-### Removed
-  - ?
+  - Pre-commit hook adds entire file to commit when only part of the file was indexed ([#470](https://github.com/JLLeitschuh/ktlint-gradle/pull/470))
+  - Pre-commit hook doesn't format files that have been renamed ([#471](https://github.com/JLLeitschuh/ktlint-gradle/pull/471))
+  - Reset KtLint internal caches on any `.editorconfig` files changes ([#456](https://github.com/JLLeitschuh/ktlint-gradle/issues/456))
+  - On KtLint parse error print path to file ([#476](https://github.com/JLLeitschuh/ktlint-gradle/issues/476)) 
+  - Add workaround for format tasks showing deprecation messages in Gradle 7.0 ([#480](https://github.com/JLLeitschuh/ktlint-gradle/pull/480))
 
 ## [10.0.0] - 2021.02.09
 ### Changed

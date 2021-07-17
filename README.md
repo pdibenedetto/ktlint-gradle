@@ -2,7 +2,7 @@
 
 **Provides a convenient wrapper plugin over the [ktlint](https://github.com/pinterest/ktlint) project.**
 
-Latest plugin version: [10.0.0](/CHANGELOG.md#1000---20210209)
+Latest plugin version: [10.1.0](/CHANGELOG.md#1010---20210602)
 
 [![Join the chat at https://kotlinlang.slack.com](https://img.shields.io/badge/slack-@kotlinlang/ktlint-yellow.svg?logo=slack)](https://kotlinlang.slack.com/messages/CKS3XG0LS)
 [![Build Status](https://travis-ci.org/JLLeitschuh/ktlint-gradle.svg?branch=master)](https://travis-ci.org/JLLeitschuh/ktlint-gradle)
@@ -24,6 +24,7 @@ The assumption being that you would not want to lint code you weren't compiling.
     - [Simple setup](#simple-setup)
     - [Using new plugin API](#using-new-plugin-api)
     - [How to apply to all subprojects](#applying-to-subprojects)
+    - [Baseline support](#baseline-support)
     - [Testing KtLint snapshots](#testing-ktlint-snapshots)
   - [Intellij IDEA plugin](#intellij-idea-only-plugin)
     - [Simple setup](#idea-plugin-simple-setup)
@@ -31,6 +32,7 @@ The assumption being that you would not want to lint code you weren't compiling.
   - [Plugin configuration](#configuration)
     - [Setting reports output directory](#setting-reports-output-directory)
     - [Customer reporters](#custom-reporters)
+    - [Changing workers memory usage](#changing-workers-memory-usage)
   - [Samples](#samples)
 - [Task details](#tasks-added)
   - [Main tasks](#main-tasks)
@@ -172,6 +174,12 @@ subprojects {
 ```
 </details>
 
+#### Baseline support
+
+Plugin supports KtLint baseline with following limitations:
+- Format tasks ignore baseline. See [#1072](https://github.com/pinterest/ktlint/issues/1072) KtLint issue for more details.
+- One baseline file is generated per one Gradle project (module).
+
 #### Testing KtLint snapshots
 
 To test KtLint snapshots add following configuration into project build script (latest KtLint snapshot version name
@@ -260,6 +268,7 @@ ktlint {
     enableExperimentalRules = true
     additionalEditorconfigFile = file("/some/additional/.editorconfig")
     disabledRules = ["final-newline"]
+    baseline = file("my-project-ktlint-baseline.xml")
     reporters {
         reporter "plain"
         reporter "checkstyle"
@@ -310,6 +319,7 @@ configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
     enableExperimentalRules.set(true)
     additionalEditorconfigFile.set(file("/some/additional/.editorconfig"))
     disabledRules.set(setOf("final-newline"))
+    baseline.set(file("my-project-ktlint-baseline.xml"))
     reporters {
         reporter(ReporterType.PLAIN)
         reporter(ReporterType.CHECKSTYLE)
@@ -385,6 +395,31 @@ class CsvReporter(
 "some_other_file.txt" won't be captured as task output. This may lead to the problem,
 that task will always be not "UP_TO_DATE" and caching will not work.
 
+#### Changing workers memory usage
+
+By default, KtLint Gradle workers will use at most 256mb of heap size. For some projects it may be not enough, 
+but it is possible to change:
+
+<details>
+<summary>Groovy</summary>
+
+```groovy
+tasks.withType(org.jlleitschuh.gradle.ktlint.tasks.BaseKtLintCheckTask).configureEach {
+    it.workerMaxHeapSize.set("512m")
+}
+```
+</details>
+
+<details open>
+<summary>Kotlin script</summary>
+
+```kotlin
+tasks.withType<org.jlleitschuh.gradle.ktlint.tasks.BaseKtLintCheckTask> {
+    workerMaxHeapSize.set("512m")
+}
+```
+</details>
+
 ### Samples
 
 This repository provides the following examples of how to set up this plugin:
@@ -392,9 +427,8 @@ This repository provides the following examples of how to set up this plugin:
 - [kotlin-gradle](/samples/kotlin-gradle) - applies plugin to plain Kotlin project that uses groovy in `build.gradle` files
 - [kotlin-js](/samples/kotlin-js) - applies plugin to kotlin js project
 - [kotlin-ks](/samples/kotlin-ks) - applies plugin to plain Kotlin project that uses Kotlin DSL in `build.gradle.kts` files
-- [kotlin-multiplatform-common](/samples/kotlin-multiplatform-common) - applies plugin to Kotlin common multiplatform module
-- [kotlin-multiplatform-js](/samples/kotlin-multiplatform-js) - applies plugin to Kotlin JavaScript multiplatform module
-- [kotlin-multiplatform-jvm](/samples/kotlin-multiplatform-jvm) - applies plugin to Kotlin JVM multiplatform module
+- [kotlin-multiplatform](/samples/kotlin-mpp) - applies plugin to Kotlin common multiplatform module
+- [kotlin-multiplatform-android](/samples/kotlin-mpp-android) - applies plugin to Kotlin android multiplatform module
 - [kotlin-rulesets-using](/samples/kotlin-rulesets-using) - adds custom [example](/samples/kotlin-ruleset-creating) ruleset
 - [kotlin-reporter-using](/samples/kotlin-reporter-using) - adds custom [example](/samples/kotlin-reporter-creating) reporter 
 

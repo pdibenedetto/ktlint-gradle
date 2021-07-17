@@ -57,6 +57,8 @@ private fun postCheck(
     ""
 }
 
+internal const val NF = "\$NF"
+
 @Language("Sh")
 internal fun generateGitHook(
     taskName: String,
@@ -65,7 +67,7 @@ internal fun generateGitHook(
 ) =
     """
 
-    CHANGED_FILES="${'$'}(${generateGitCommand(gradleRootDirPrefix)} | awk '$1 != "D" && $2 ~ /\.kts|\.kt/ { print $2}')"
+    CHANGED_FILES="${'$'}(${generateGitCommand(gradleRootDirPrefix)} | awk '$1 != "D" && $NF ~ /\.kts?$/ { print $NF }')"
 
     if [ -z "${'$'}CHANGED_FILES" ]; then
         echo "No Kotlin staged files."
@@ -74,11 +76,24 @@ internal fun generateGitHook(
 
     echo "Running ktlint over these files:"
     echo "${'$'}CHANGED_FILES"
-
+    
+    diff=.git/unstaged-ktlint-git-hook.diff
+    git diff --color=never > ${'$'}diff
+    if [ -s ${'$'}diff ]; then
+      git apply -R ${'$'}diff
+    fi
+    
     ${generateGradleCommand(taskName, gradleRootDirPrefix)}
 
     echo "Completed ktlint run."
     ${postCheck(shouldUpdateCommit)}
+    
+    if [ -s ${'$'}diff ]; then
+      git apply --ignore-whitespace ${'$'}diff
+    fi
+    rm ${'$'}diff
+    unset diff
+    
     echo "Completed ktlint hook."
 
     """.trimIndent()
